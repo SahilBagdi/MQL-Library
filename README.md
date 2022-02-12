@@ -3,7 +3,7 @@ This Is My Personal MQL4/MQL5 Library
 
 Both:
 
-1.) Trading hour Verification
+1.) Trading Hour Verification
 
 MQL4: 
 
