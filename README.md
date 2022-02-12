@@ -7,7 +7,7 @@ Both:
 
 MQL4: 
 
-1.) Trial Stuffs
+1.) Trial Stuffs\n
 2.) Open Pending Order
 
 MQL5: 
