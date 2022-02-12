@@ -1,0 +1,24 @@
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool OpenPendingOrder(string Symbol_, string BUY_SELL, double Volume_, double Price_, int Slippage_Points, double StopLoss_, double TakeProfit_, string Comment_, int MN_) {
+    
+    int orderType_ = -1;RefreshRates();
+    double upperLevel_ = Bid + (MarketInfo(Symbol(),MODE_STOPLEVEL)+MarketInfo(Symbol(),MODE_FREEZELEVEL)+2) * Point();
+    double lowerLevel_ = Ask - (MarketInfo(Symbol(),MODE_STOPLEVEL)+MarketInfo(Symbol(),MODE_FREEZELEVEL)+2) * Point();
+    
+    if(Price_<upperLevel_ && Price_>lowerLevel_) return false;
+    
+    if(Price_>upperLevel_) {
+        if(BUY_SELL=="BUY") orderType_ = OP_BUYSTOP;
+        if(BUY_SELL=="SELL") orderType_ = OP_SELLLIMIT;
+    }
+    if(Price_<lowerLevel_) {
+        if(BUY_SELL=="BUY") orderType_ = OP_BUYLIMIT;
+        if(BUY_SELL=="SELL") orderType_ = OP_SELLSTOP;
+    }
+    int OS = OrderSend(Symbol_ , orderType_, Volume_, Price_, Slippage_Points, StopLoss_, TakeProfit_, Comment_, MN_, 0);
+    if(OS==-1) return false;
+    return true;
+}
+//+------------------------------------------------------------------+
