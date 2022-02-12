@@ -1,15 +1,20 @@
 # MQL-Library
 This Is My Personal MQL4/MQL5 Library
 
+
 Both:
 
 1.) Trading Hour Verification
+
+
 
 MQL4: 
 
 1.) Trial Stuffs
 
 2.) Open Pending Order
+
+
 
 MQL5: 
 
