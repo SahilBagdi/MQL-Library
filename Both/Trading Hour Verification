@@ -1,0 +1,18 @@
+//--- Trading Hour Verification
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool Trading_Hour_Verification(string startTime, string endTime, datetime currentTime) {
+    if((datetime)startTime<(datetime)endTime) {
+        if((datetime)startTime<=(datetime)TimeToString(currentTime,TIME_MINUTES) && (datetime)endTime>=(datetime)TimeToString(currentTime,TIME_MINUTES)) return true;
+    }
+    if((datetime)startTime>(datetime)endTime) {
+        if((datetime)startTime>=(datetime)TimeToString(currentTime,TIME_MINUTES) && (datetime)endTime<=(datetime)TimeToString(currentTime,TIME_MINUTES)) return true;
+    }
+    if((datetime)startTime==(datetime)endTime) {
+        if((datetime)startTime==(datetime)TimeToString(currentTime,TIME_MINUTES)) return true;
+    }
+    return false;
+}
+//+------------------------------------------------------------------+
