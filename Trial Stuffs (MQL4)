@@ -1,0 +1,57 @@
+//--- Trial Stuff 
+ 
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void Trial(string Trial_Till){//Example : Trial_Till = "2021.12.05"
+    
+    //if You Want To Set Trial In OnTick Then Follow Below Steps :
+    //Put [bool Trial_One_Time = true;] In Global
+    //Put [if(Trial_One_Time) {Trial("2022.01.21");Trial_One_Time=false;}] In On Tick
+    
+    if((datetime)TimeToString(TimeGMT(),TIME_DATE)>(datetime)Trial_Till) {
+        
+        string Link_To_MQL5_Profile = "https://www.mql5.com/en/users/sahilbagdi";
+        string Link_To_Telegram = "https://t.me/AlexBrown0321";
+        
+        MessageBox("Your Trial has been Ended, Please Contact the Developer to Renew it.\n\nLink to the Developer:\n\n"+(string)Link_To_MQL5_Profile+"\n\nThis Link Will Now Open In Your Brower.\n\n\nEA Will Now Quit.","ERROR",MB_ICONERROR|MB_OK);
+        if(TerminalInfoInteger(TERMINAL_DLLS_ALLOWED)) {
+            openURL(Link_To_MQL5_Profile);
+        }
+        else {
+            MessageBox("Oops...\n\nBrowser Failed To Open BECAUSE DLL IMPORTS are not Allowed.\n\nYou can allow them following the below steps:\n\n1.) Click On Chart Then Press \"Ctrl + O\" On Keyboard. \n\n2.) Now Click \"Expert Advisors\" Tab.\n\n3.) Tick Allow DLL Imports.\n\nThat's It! but Don't Forget To Click \"OK\" To Save It.\n\nNow Attach This EA/Indicator To The Chart Again.\n\n\nEA Will Now Quit.","ERROR",MB_ICONERROR|MB_OK);
+            ExpertRemove();
+        }
+        Sleep(5000);
+        MessageBox("You Can Also Contact The Developer On Telegram By Following the below link:\n\n"+(string)Link_To_Telegram+"\n\nOR\n\nYou Can Search @AlexBrown0321 On Telgram.\n\nThis Link Will Now Open In Your Brower.\n\n\nEA Will Now Quit.","Another Way To GO!",MB_ICONINFORMATION|MB_OK);
+        openURL(Link_To_Telegram);
+        ExpertRemove();
+    }
+}
+    
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool openURL(string url){
+    int APPEND  = FILE_CSV|FILE_WRITE;
+    string  file = MQLInfoString(MQL_PROGRAM_NAME) + ".URL";
+    int handle   = FileOpen(file, APPEND, '~');
+    if (handle < 1){ int GLE = GetLastError();Print("Last Error Code: "+(string)GLE);ResetLastError();}
+    FileWrite(handle, "[InternetShortcut]");
+    FileWrite(handle, "URL="+url);
+    FileClose(handle);
+    return ( Shell(TerminalInfoString(TERMINAL_DATA_PATH)+"\\MQL4\\Files\\"+file) );      // or "cmd.exe", "/C "+file
+}
+#import "shell32.dll"
+   int ShellExecuteW(int hWnd, string Verb, string File, string Parameter, string Path, int ShowCmd);
+#import
+bool Shell(string file, string parameters=""){
+    #define DEFDIRECTORY NULL
+    #define OPERATION "open"    // or print
+    #define SW_SHOWNORMAL 1
+    int r=ShellExecuteW(0, OPERATION, file, parameters, DEFDIRECTORY, SW_SHOWNORMAL);
+    if (r > 32) return(true);
+    //Alert("Shell failed: ",r);
+    return(false);
+}
+//+------------------------------------------------------------------+
