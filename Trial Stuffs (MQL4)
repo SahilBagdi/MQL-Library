@@ -32,7 +32,7 @@ void Trial(string Trial_Till){//Example : Trial_Till = "2021.12.05"
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool openURL(string url){
+bool openURL(string url) {
     int APPEND  = FILE_CSV|FILE_WRITE;
     string  file = MQLInfoString(MQL_PROGRAM_NAME) + ".URL";
     int handle   = FileOpen(file, APPEND, '~');
