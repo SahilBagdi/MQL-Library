@@ -1,0 +1,21 @@
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int TotalOpenOrders(string OPEN_PENDING_BOTH) {
+    int Count = 0;
+    for(int i=OrdersTotal()-1; i>=0;i--) {
+        if(OrderSelect(i,SELECT_BY_POS) && OrderSymbol()==Symbol() && OrderMagicNumber()==MN) {
+            if(OPEN_PENDING_BOTH=="OPEN") {
+                if(OrderType()==OP_SELL || OrderType()==OP_BUY) Count++;
+            }
+            if(OPEN_PENDING_BOTH=="PENDING") {
+                if(OrderType()!=OP_SELL && OrderType()!=OP_BUY) Count++;
+            }
+            if(OPEN_PENDING_BOTH=="BOTH") {
+                Count++;
+            }
+        }
+    }
+    return(Count);
+}
+//+------------------------------------------------------------------+
