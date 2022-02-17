@@ -1,0 +1,260 @@
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool MarketOpen() {
+    datetime begin;
+    datetime end;
+    datetime next;
+    SymbolInfoSessionTimes(NULL,begin,end,next);
+    if(TimeCurrent()>begin && TimeCurrent()<end) {
+        return true;
+    }
+    return false;
+}
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//| SymbolInfoSessionTimes()                                         |
+//+------------------------------------------------------------------+
+bool SymbolInfoSessionTimes(const string symbol, long& session_begin, long& session_end, long& next_session, const bool quote_sessions = false, const long reference_time = NULL)
+{
+    // Local cache
+    
+        static  string  c_symbol    = NULL;
+        static  bool    c_quotes    = false;
+        static  long    c_ref_time  = NULL;
+        static  ulong   c_timestamp = NULL;
+        static  long    c_begin     = NULL;
+        static  long    c_end       = NULL;
+        static  long    c_next      = NULL;
+
+
+    // Cache update
+    
+        if( (c_symbol == symbol)
+         && (c_quotes == quote_sessions)
+         && (c_ref_time == reference_time) 
+         && (c_timestamp > GetTickCount64() - 1000) )
+        {
+            session_begin   = c_begin;
+            session_end     = c_end;
+            next_session    = c_next;
+            return(true);
+        }
+        c_symbol    = symbol;
+        c_quotes    = quote_sessions;
+        c_timestamp = GetTickCount64();
+
+
+    // Pre init
+
+                MqlDateTime     mql_time        = {};
+                const ulong     time_current    = (reference_time == NULL) ? TimeTradeServer(mql_time) : (ulong)reference_time;
+                if( (reference_time > NULL)
+                 && (!TimeToStruct(time_current, mql_time)) )
+                { 
+                    session_begin   = 0xFFFFFFFFFFFFFFFF;
+                    session_end     = 0xFFFFFFFFFFFFFFFF;
+                    next_session    = 0xFFFFFFFFFFFFFFFF;
+                    return(false); 
+        }
+                
+
+    // Local init
+
+                ulong           start           = NULL;
+                ulong           finish          = NULL;
+                ulong           day_start       = time_current - (time_current % 0x0000000000015180) - 0x0000000000015180;
+                ulong           session_index   = NULL;
+                session_begin   = NULL;
+                session_end     = NULL;
+                next_session    = NULL;
+    
+
+        // Loop search 
+
+                for(ulong cnt = NULL; (cnt < 0x08) && !_StopFlag; cnt++)
+                {
+                        // Current time offset
+                        day_start      += 0x0000000000015180;
+                        session_index   = NULL;
+
+                        // Switch type of evaluation
+                        switch((uint)cnt)
+                        {
+                                // Find current session if any
+                                case 0x00:
+                                        if(quote_sessions)
+                                        {
+                                                while( ((day_start + finish) <= time_current)
+                                                        && (mqlplus::SymbolInfoSessionQuote(symbol, DayOfWeekToEnum(mql_time.day_of_week + cnt), (int)(session_index++), start, finish)) 
+                                                        && !_StopFlag);
+                                        }
+                                        else
+                                        {
+                                                while( ((day_start + finish) <= time_current)
+                                                        && (mqlplus::SymbolInfoSessionTrade(symbol, DayOfWeekToEnum(mql_time.day_of_week + cnt), (int)(session_index++), start, finish)) 
+                                                        && !_StopFlag);
+                                        }
+                                        
+                                        // Check results
+                                        if( ((day_start + start) <= time_current) 
+                                         && ((day_start + finish) > time_current))
+                                        {
+                                                session_begin           = (long)(day_start + start);
+                                                session_end             = (long)(day_start + finish);
+                                        }
+
+                                        // Search for beginning of session
+                                        if(session_begin > NULL)
+                                        {
+                                                // Init loop
+                                                int             session_index1  = NULL;
+                                                int             max_count               = NULL;
+                                                ulong       local_begin     = NULL;
+                                                ulong       local_end       = NULL;
+                                                
+                                                // Loop search
+                                                for(int cnt1 = (day_start == session_begin); (cnt1 < 0x08) && !_StopFlag; cnt1++)
+                                                {
+                                                        // Init search loop
+                                                        day_start      -= 0x0000000000015180 * ((cnt1 > NULL) && (session_index1 == NULL));
+                                                        session_index1  = NULL;                    
+                                                        //local_begin     = NULL;
+                                                        local_end       = NULL;
+                
+                                                        // Loop backwards
+                                                        if(quote_sessions)
+                                                        {
+                                                                while( ((session_index1 < max_count) || (max_count == NULL))
+                                                                        && (mqlplus::SymbolInfoSessionQuote(symbol, DayOfWeekToEnum(mql_time.day_of_week - cnt1), (int)(session_index1++), start, finish)) 
+                                                                        && ((long)(day_start + finish) <= session_begin) 
+                                                                        && !_StopFlag)
+                                                                {
+                                                                        local_begin = (day_start + start);
+                                                                        local_end   = (day_start + finish);
+                                                                }
+                                                        }
+                                                        else
+                                                        {
+                                                                while( ((session_index1 < max_count) || (max_count == NULL))
+                                                                        && (mqlplus::SymbolInfoSessionTrade(symbol, DayOfWeekToEnum(mql_time.day_of_week - cnt1), (int)(session_index1++), start, finish)) 
+                                                                        && ((long)(day_start + finish) <= session_begin) 
+                                                                        && !_StopFlag)
+                                                                {
+                                                                        local_begin = (day_start + start);
+                                                                        local_end   = (day_start + finish);
+                                                                }
+                                                        }
+                                                                
+                                                        // Repeat search on same day if more than one session
+                                                        if(session_begin == local_end)
+                                                        {
+                                                                session_begin   = (long)(local_begin);
+                                                                cnt1           -= 1 * (session_index1 > 0x01);
+                                                                max_count       = session_index1;
+                                                        }
+
+                                                        cnt1 |= 0xFF * (session_begin > (long)local_end);
+                                                }
+                                                
+                                                // Reset day_start variable
+                                                day_start = time_current - (time_current % 0x0000000000015180);
+                                        }
+                                        
+                                        // Check for multiple sessions
+                                        if( ((long)(day_start + start) > session_end) 
+                                         && (finish > NULL))
+                                        {
+                                                next_session            = (long)(day_start + start);
+                                                c_begin = session_begin;
+                                                c_end   = session_end;
+                                                c_next  = next_session;
+                                                return(true);
+                                        }
+
+                                        
+                                // Find next session
+                                default:
+                                        if(quote_sessions) 
+                                        {
+                                                if(!mqlplus::SymbolInfoSessionQuote(symbol, DayOfWeekToEnum(mql_time.day_of_week + cnt), (int)(session_index++), start, finish))
+                                                { continue; }
+                                        }
+                                        else 
+                                        {
+                                                if(!mqlplus::SymbolInfoSessionTrade(symbol, DayOfWeekToEnum(mql_time.day_of_week + cnt), (int)(session_index++), start, finish))
+                                                { continue; }
+                                        }
+                                        
+                                        // Next found session                 
+                                        next_session                = (long)(day_start + start) * (session_end < (long)(day_start + start));
+                                        session_end                 = (long)((session_end * (next_session > NULL)) + ((day_start + finish) * (next_session == NULL)));
+                        }
+                        
+                        if(next_session > NULL)
+                        { 
+                c_begin = session_begin;
+                c_end   = session_end;
+                c_next  = next_session;
+                            return(true); 
+                        }
+                }
+
+
+    // Clear to zero as 24/7 sessions
+    session_begin   = NULL;
+    session_end     = NULL;
+    next_session    = NULL;
+        c_begin = session_begin;
+        c_end   = session_end;
+        c_next  = next_session;
+
+    // Return
+    return(false);
+}
+
+namespace mqlplus
+{
+
+//+------------------------------------------------------------------+
+//| SymbolInfoSessionQuote()                                         |
+//+------------------------------------------------------------------+
+bool SymbolInfoSessionQuote(const string symbol, const ENUM_DAY_OF_WEEK day, const int session_index, datetime& start, datetime& finish)
+{
+    start   = NULL;
+    finish  = NULL;
+    return(::SymbolInfoSessionQuote(symbol, day, session_index, start, finish));
+}
+
+
+//+------------------------------------------------------------------+
+//| SymbolInfoSessionTrade()                                         |
+//+------------------------------------------------------------------+
+bool SymbolInfoSessionTrade(const string symbol, const ENUM_DAY_OF_WEEK day, const int session_index, datetime& start, datetime& finish)
+{
+    start   = NULL;
+    finish  = NULL;
+    return(::SymbolInfoSessionTrade(symbol, day, session_index, start, finish));
+}
+
+
+}
+
+//+------------------------------------------------------------------+
+//| DayOfWeekToEnum()                                                |
+//+------------------------------------------------------------------+
+template <typename T>
+const ENUM_DAY_OF_WEEK DayOfWeekToEnum(const T day_of_week, const bool first_day_monday = false)
+{
+    switch((((uchar)day_of_week) + ((uchar)(first_day_monday))) % 7)
+    {
+        case 0x01:  return(MONDAY);
+        case 0x02:  return(TUESDAY);
+        case 0x03:  return(WEDNESDAY);
+        case 0x04:  return(THURSDAY);
+        case 0x05:  return(FRIDAY);
+        case 0x06:  return(SATURDAY);
+        default:    return(SUNDAY);
+    }    
+}
