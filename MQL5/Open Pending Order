@@ -1,0 +1,34 @@
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool OpenPendingOrder(string Symbol_, string BUY_SELL, double Volume_, double Price_, int Slippage_Points, double StopLoss_, double TakeProfit_, string Comment_, int MN_) {
+    
+    //int orderType_ = -1;RefreshRates();
+    double upperLevel_ = s_tick.bid + (SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)+SymbolInfoInteger(_Symbol,SYMBOL_TRADE_FREEZE_LEVEL)+2) * Point();
+    double lowerLevel_ = s_tick.ask - (SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)+SymbolInfoInteger(_Symbol,SYMBOL_TRADE_FREEZE_LEVEL)+2) * Point();
+    
+    if(Price_<upperLevel_ && Price_>lowerLevel_) return false;
+    MqlTradeRequest s_trade_request;
+    MqlTradeResult s_trade_result;
+    s_trade_request.action = TRADE_ACTION_PENDING;
+    s_trade_request.magic = MN_;
+    s_trade_request.symbol = Symbol_;
+    s_trade_request.volume = Volume_;
+    s_trade_request.price = Price_;
+    s_trade_request.sl = StopLoss_;
+    s_trade_request.tp = TakeProfit_;
+    s_trade_request.comment = Comment_;
+
+    if(Price_>upperLevel_) {
+        if(BUY_SELL=="BUY") s_trade_request.type = ORDER_TYPE_BUY_STOP;
+        if(BUY_SELL=="SELL") s_trade_request.type = ORDER_TYPE_SELL_LIMIT;
+    }
+    if(Price_<lowerLevel_) {
+        if(BUY_SELL=="BUY") s_trade_request.type = ORDER_TYPE_BUY_LIMIT;
+        if(BUY_SELL=="SELL") s_trade_request.type = ORDER_TYPE_SELL_STOP;
+    }
+    
+    if(!OrderSend(s_trade_request,s_trade_result)) return false;
+    return true;
+}
+//+------------------------------------------------------------------+
