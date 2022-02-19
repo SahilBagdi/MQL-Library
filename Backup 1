@@ -1,0 +1,98 @@
+//+------------------------------------------------------------------+
+//|                                                  Test Script.mq4 |
+//|                        Copyright 2021, MetaQuotes Software Corp. |
+//|                                             https://www.mql5.com |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2021, MetaQuotes Software Corp."
+#property link      "https://www.mql5.com"
+#property version   "1.00"
+#property strict
+//#include <TestScript.mqh>
+//TestScript m_testScript;
+//class Animal {
+//    public:
+//        //void            PrintAnimal() {Alert("Animal Print 1");}
+//        void            PrintAnimal();
+//};
+//Animal m_animal;
+//
+//class Cat : public Animal{
+//    public:
+//        //void            PrintAnimal() {Alert("Cat Print 1");}
+//        void            PrintAnimal();
+//};
+//Cat m_cat;
+
+
+
+//#define ENUM_ORDER_TYPE _ENUM_ORDER_TYPE
+//#define ORDER_TYPE_OPEN sdjajsdfb348y7
+//#define ORDER_TYPE_PENDING hde78rhg348f
+//#define ORDER_TYPE_BOTH rns_w418741341345
+//enum ENUM_ORDER_TYPE {
+//    ORDER_TYPE_OPEN,
+//    ORDER_TYPE_PENDING,
+//    ORDER_TYPE_BOTH,
+//};
+
+//class MyFunctions {
+//public:
+//     int     TotalOpenOrders(ENUM_ORDER_TYPE ENUM_ORDER_TYPE_INPUT);
+//};
+//
+////+------------------------------------------------------------------+
+////|                                                                  |
+////+------------------------------------------------------------------+
+//int MyFunctions::TotalOpenOrders(ENUM_ORDER_TYPE ORDER_TYPE_) {
+//    int Count = 0;
+//    for(int i=OrdersTotal()-1; i>=0;i--) {
+//        if(OrderSelect(i,SELECT_BY_POS) && OrderSymbol()==Symbol()) {
+//            if(ORDER_TYPE_==ORDER_TYPE_OPEN) {
+//                if(OrderType()==OP_SELL || OrderType()==OP_BUY) Count++;
+//            }
+//            if(ORDER_TYPE_==ORDER_TYPE_PENDING) {
+//                if(OrderType()!=OP_SELL && OrderType()!=OP_BUY) Count++;
+//            }
+//            if(ORDER_TYPE_==ORDER_TYPE_BOTH) {
+//                Count++;
+//            }
+//        }
+//    }
+//    return(Count);
+//}
+////+------------------------------------------------------------------+
+
+//#include <My Functions.mqh>
+
+//MyFunctions m_myFunctions;
+//+------------------------------------------------------------------+
+//| Script program start function                                    |
+//+------------------------------------------------------------------+
+void OnStart() {
+    //Alert(m_myFunctions.TotalOpenOrders(ORDER_TYPE_BUY));
+}
+//+------------------------------------------------------------------+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//void Animal::PrintAnimal(void) {
+//    Alert("Animal Print 1");
+//}
+//
+//void Cat::PrintAnimal() {
+//    Alert("Cat Print 1");
+//}
