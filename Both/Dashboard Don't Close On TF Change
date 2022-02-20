@@ -1,0 +1,38 @@
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit() {
+    X1=100;Y1=100;X2=100;Y2=100;
+    Create = true;
+    for(int i=0; i<ObjectsTotal(0,0,OBJ_EDIT); i++) {
+        if(ObjectDescription(ObjectName(0,i,0,OBJ_EDIT))=="1") {
+            Create=false;
+        }
+    }
+    if(Create) {
+        m_appDialog1.Create(0,"1",0,X1,Y1,X1+X2,Y1+Y2);
+        m_appDialog1.Run();
+    }
+    Create = true;
+    X1=300;Y1=100;X2=100;Y2=100;
+    for(int i=0; i<ObjectsTotal(0,0,OBJ_EDIT); i++) {
+        if(ObjectDescription(ObjectName(0,i,0,OBJ_EDIT))=="2") {
+            Create=false;
+        }
+    }
+    if(Create) {
+        m_appDialog2.Create(0,"2",0,X1,Y1,X1+X2,Y1+Y2);
+        m_appDialog2.Run();
+    }
+}
+//+------------------------------------------------------------------+
+
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason) {
+    if(reason!=3) m_appDialog1.Destroy(reason);
+    if(reason!=3) m_appDialog2.Destroy(reason);
+}
+//+------------------------------------------------------------------+
